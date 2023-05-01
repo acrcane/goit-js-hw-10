@@ -6,11 +6,9 @@ import { createMarkupFinal } from './js/createMarkupInfoCountry';
 import debounce from 'lodash.debounce';
 import { Notify } from 'notiflix';
 
-
-
 const DEBOUNCE_DELAY = 300;
 
-const collection = getCollection()
+const collection = getCollection();
 
 Notify.init({
     width: '300px',
@@ -29,7 +27,7 @@ Notify.init({
         fontAwesomeClassName: 'fas fa-times-circle',
         fontAwesomeIconColor: 'rgba(0,0,0,0.2)',
         backOverlayColor: 'rgba(255,85,73,0.2)',
-    },
+  },
     info: {
         background: '#26c0d3',
         textColor: '#fff',
@@ -38,59 +36,49 @@ Notify.init({
         fontAwesomeClassName: 'fas fa-info-circle',
         fontAwesomeIconColor: 'rgba(0,0,0,0.2)',
         backOverlayColor: 'rgba(38,192,211,0.2)',
-    },
+  },
 });
 
-collection.searchField.addEventListener('input', debounce(checkAndClear ,DEBOUNCE_DELAY))
+collection.searchField.addEventListener('input', debounce(checkAndClear, DEBOUNCE_DELAY));
 
-function checkAndClear(elem){
-    if(elem.target.value === ''){
+function checkAndClear(elem) {
+    const query = elem.target.value.trim();
+
+    if (!query) {
         clearAll();
         return;
     }
 
-    fetchCountries(elem.target.value.trim())
-    .then(country => {
-        if(country.length > 10){
-            onNotification('info');
+    fetchCountries(query)
+        .then((country) => {
+            if (country.length > 10) {
+                onNotification('info');
             return;
         }
         if (country.length === 1) {
             renderMarkupFinal(country);
             return;
         }
-        createMarkup(country);
-        renderMarkup(); 
+    renderMarkup(country);
     })
     .catch(() => {
-        onNotification('failure');
+      onNotification('failure');
     });
-};
+}
 
+function renderMarkup(country) {
+    clearAll();
+    collection.countryList.innerHTML = createMarkup(country);
+}
 
+function renderMarkupFinal(country) {
+    clearAll();
+    collection.infoItem.innerHTML = createMarkupFinal(country);
+}
 
-
-function renderMarkupFinal(country){
-    clearMarkupFinal()
-    collection.infoItem.innerHTML = createMarkupFinal(country)
-};
-
-function renderMarkup(country){
-    clearMarkup()
-    collection.countryList.innerHTML = createMarkup(country)
-};
-
-function clearMarkup(){
+function clearAll() {
     collection.countryList.innerHTML = '';
-};
-
-function clearMarkupFinal(){
     collection.infoItem.innerHTML = '';
-};
-
-function clearAll(){
-    clearMarkup();
-    clearMarkupFinal()
 }
 
 function onNotification(error) {
@@ -100,7 +88,7 @@ function onNotification(error) {
         case 'info':
             Notify.info('Too many matches found. Please enter a more specific name.');
         break;
-  
+
         case 'failure':
             Notify.failure('Oops, there is no country with that name');
         break;
